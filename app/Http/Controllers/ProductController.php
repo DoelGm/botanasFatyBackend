@@ -26,6 +26,7 @@ class ProductController extends Controller
             'name' => 'required|string|max:255',
             'price' => 'required|numeric',
             'description' => 'nullable|string',
+            'category_id' => 'required|exists:categories,id',
             'imgs' => 'nullable|array',
             'imgs.*' => 'url',
         ]);
@@ -34,6 +35,7 @@ class ProductController extends Controller
         $product->name = $validatedData['name'];
         $product->price = $validatedData['price'];
         $product->description = $validatedData['description'] ?? null;
+        $product->category_id = $validatedData['category_id'];
         $product->imgs = isset($validatedData['imgs']) ? json_encode($validatedData['imgs']) : json_encode([]);
         $product->save();
 
@@ -69,12 +71,14 @@ class ProductController extends Controller
             'name' => 'sometimes|required|string|max:255',
             'price' => 'sometimes|required|numeric',
             'description' => 'nullable|string',
+            'category_id' => 'sometimes|required|exists:categories,id',
             'imgs' => 'nullable|array',
             'imgs.*' => 'url',
             'remove_imgs' => 'nullable|array', // Para eliminar imágenes
             'remove_imgs.*' => 'url', // Validación de las imágenes a eliminar
+           
         ]);
-    
+
         if (isset($validatedData['name'])) {
             $product->name = $validatedData['name'];
         }
@@ -86,7 +90,10 @@ class ProductController extends Controller
         if (array_key_exists('description', $validatedData)) {
             $product->description = $validatedData['description'];
         }
-    
+        if (array_key_exists('category_id', $validatedData)) {
+            $product->category_id = $validatedData['category_id'];
+        }
+
         // Si se recibe nuevas imágenes (imgs), las agregamos
         if (isset($validatedData['imgs'])) {
             $existingImgs = json_decode($product->imgs ?? '[]', true);
