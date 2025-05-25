@@ -5,9 +5,13 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\CustumerController;
 use App\Http\Controllers\packagesController;
 use App\Http\Controllers\ProductController;
+
+use App\Http\Controllers\PostController; //post
+
 use App\Http\Controllers\UserController;
+
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Route;  
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
@@ -29,6 +33,14 @@ Route::post('/categories', [CategoryController::class, 'store']);
 Route::get('/categories', [CategoryController::class, 'index']);
 
 
+Route::get('/posts', [PostController::class, 'index']);
+Route::get('/posts/{id}', [PostController::class, 'show']);
+Route::post('/posts', [PostController::class, 'store']);
+Route::put('/posts/{id}', [PostController::class, 'update']);
+Route::delete('/posts/{id}', [PostController::class, 'destroy']);
+
+
+
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/customers', [CustomerController::class, 'index']);
     Route::get('/customers/{id}', [CustomerController::class, 'show']);
@@ -45,6 +57,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/users/{id}', [UserController::class, 'destroy']);
 
 });
+
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/packages', [packagesController::class, 'index']);

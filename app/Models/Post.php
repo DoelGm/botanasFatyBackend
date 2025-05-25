@@ -9,7 +9,6 @@ class Post extends Model
     protected $fillable = [
         'title',
         'content',
-        'imgs',
     ];
 
     protected $casts = [
@@ -18,9 +17,6 @@ class Post extends Model
     protected $hidden = [
         'created_at',
         'updated_at',
-    ];
-    protected $appends = [
-        'imgs',
     ];
     public function category()
     {
