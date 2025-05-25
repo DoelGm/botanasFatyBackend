@@ -24,17 +24,21 @@ class ProductController extends Controller
     try {
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
-            'price' => 'required|numeric',
             'description' => 'nullable|string',
+            'price' => 'required|numeric',
+            'discount' => 'nullable|numeric',
             'category_id' => 'required|exists:categories,id',
             'imgs' => 'nullable|array',
-            'imgs.*' => 'url',
+            'imgs.*' => 'nullable|url',
+            'stock' => 'nullable|integer',
         ]);
 
         $product = new Product();
         $product->name = $validatedData['name'];
-        $product->price = $validatedData['price'];
         $product->description = $validatedData['description'] ?? null;
+        $product->price = $validatedData['price'];
+        $product->stock = $validatedData['stock'] ?? null;
+        $product->discount = $validatedData['discount'] ?? null;
         $product->category_id = $validatedData['category_id'];
         $product->imgs = isset($validatedData['imgs']) ? json_encode($validatedData['imgs']) : json_encode([]);
         $product->save();
@@ -72,6 +76,8 @@ class ProductController extends Controller
             'price' => 'sometimes|required|numeric',
             'description' => 'nullable|string',
             'category_id' => 'sometimes|required|exists:categories,id',
+            'stock' => 'nullable|integer',
+            'discount' => 'nullable|numeric',
             'imgs' => 'nullable|array',
             'imgs.*' => 'url',
             'remove_imgs' => 'nullable|array', // Para eliminar imágenes
@@ -89,6 +95,12 @@ class ProductController extends Controller
     
         if (array_key_exists('description', $validatedData)) {
             $product->description = $validatedData['description'];
+        }
+        if (array_key_exists('stock', $validatedData)) {
+            $product->stock = $validatedData['stock'];
+        }
+        if (array_key_exists('discount', $validatedData)) {
+            $product->discount = $validatedData['discount'];
         }
         if (array_key_exists('category_id', $validatedData)) {
             $product->category_id = $validatedData['category_id'];
