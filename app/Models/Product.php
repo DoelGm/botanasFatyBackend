@@ -10,12 +10,14 @@ class Product extends Model
         'price' => 'decimal:2',
         'discount' => 'decimal:2',
         'category_id' => 'integer',
+        'stock' => 'integer',
     ];
     protected $fillable = [
         'name',
         'price',
         'description',
         'category_id',
+        'stock',
         'discount',
     ];
     protected $hidden = [
