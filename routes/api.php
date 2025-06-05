@@ -6,7 +6,7 @@ use App\Http\Controllers\CustumerController;
 use App\Http\Controllers\packagesController;
 use App\Http\Controllers\ProductController;
 
-use App\Http\Controllers\ImgurController;//ImgurController
+use App\Http\Controllers\ImageController; //image
 
 use App\Http\Controllers\PostController; //post
 
@@ -41,14 +41,7 @@ Route::post('/posts', [PostController::class, 'store']);
 Route::put('/posts/{id}', [PostController::class, 'update']);
 Route::delete('/posts/{id}', [PostController::class, 'destroy']);
 
-Route::get('/upload', [ImgurController::class, 'index']);
-
-Route::middleware('auth:sanctum')->group(function () {
-   
-    Route::post('/upload', [ImgurController::class, 'upload']);
-
-});// ImgurController
-
+Route::get('/image/{type}/{id}', [ImageController::class, 'getImage']);
 
 
 

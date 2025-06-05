@@ -4,138 +4,145 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Intervention\Image\Facades\Image;
 
 class ProductController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    // GET /api/products
     public function index()
+    {
+        $products = Product::all();
+
+        foreach ($products as $product) {
+            $product->image_urls = $product->image_urls; // usa el accessor del modelo
+        }
+
+        return response()->json($products);
+    }
+
+    // POST /api/products
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'price' => 'required|numeric',
+            'discount' => 'nullable|numeric',
+            'category_id' => 'nullable|exists:categories,id',
+            'stock' => 'required|integer|min:0',
+            'images.*' => 'nullable|image|mimes:jpeg,png,jpg,webp',
+        ]);
+
+        // Crear el producto
+        $product = Product::create($validated);
+
+        // Guardar imágenes (hasta 3)
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $index => $image) {
+                if ($index < 3) {
+                    $this->saveImage($image, $product->id, $index + 1);
+                }
+            }
+        }
+
+        return response()->json([
+            'message' => 'Producto creado con éxito',
+            'product' => $product
+        ], 201);
+    }
+
+    public function showAll()
     {
         $products = Product::all();
         return response()->json($products);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-   public function store(Request $request)
-{
-    try {
-        $validatedData = $request->validate([
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'price' => 'required|numeric',
-            'discount' => 'nullable|numeric',
-            'category_id' => 'required|exists:categories,id',
-            'imgs' => 'nullable|array',
-            'imgs.*' => 'nullable|url',
-            'stock' => 'nullable|integer',
-        ]);
-
-        $product = new Product();
-        $product->name = $validatedData['name'];
-        $product->description = $validatedData['description'] ?? null;
-        $product->price = $validatedData['price'];
-        $product->stock = $validatedData['stock'] ?? null;
-        $product->discount = $validatedData['discount'] ?? null;
-        $product->category_id = $validatedData['category_id'];
-        $product->imgs = isset($validatedData['imgs']) ? json_encode($validatedData['imgs']) : json_encode([]);
-        $product->save();
-
-        return response()->json($product, 201);
-
-    } catch (\Exception $e) {
-        return response()->json([
-            'message' => 'Error al crear el producto',
-            'error' => $e->getMessage()
-        ], 500); // Código 500 = Error interno del servidor
-    }
-}
-
-
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    // GET /api/products/{id}
+    public function show($id)
     {
         $product = Product::findOrFail($id);
+        
+        $product->image_urls = $product->image_urls; // usa el accessor del modelo
+
         return response()->json($product);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
+    // PUT /api/products/{id}
     public function update(Request $request, $id)
     {
-        $product = Product::findOrFail($id);
-    
-        $validatedData = $request->validate([
-            'name' => 'sometimes|required|string|max:255',
-            'price' => 'sometimes|required|numeric',
+        $validated = $request->validate([
+            'name' => 'sometimes|string|max:255',
             'description' => 'nullable|string',
-            'category_id' => 'sometimes|required|exists:categories,id',
-            'stock' => 'nullable|integer',
+            'price' => 'sometimes|numeric',
             'discount' => 'nullable|numeric',
-            'imgs' => 'nullable|array',
-            'imgs.*' => 'url',
-            'remove_imgs' => 'nullable|array', // Para eliminar imágenes
-            'remove_imgs.*' => 'url', // Validación de las imágenes a eliminar
-           
+            'category_id' => 'nullable|exists:categories,id',
+            'stock' => 'sometimes|integer|min:0',
+            'images.*' => 'nullable|image|mimes:jpeg,png,jpg,webp',
         ]);
 
-        if (isset($validatedData['name'])) {
-            $product->name = $validatedData['name'];
-        }
-    
-        if (isset($validatedData['price'])) {
-            $product->price = $validatedData['price'];
-        }
-    
-        if (array_key_exists('description', $validatedData)) {
-            $product->description = $validatedData['description'];
-        }
-        if (array_key_exists('stock', $validatedData)) {
-            $product->stock = $validatedData['stock'];
-        }
-        if (array_key_exists('discount', $validatedData)) {
-            $product->discount = $validatedData['discount'];
-        }
-        if (array_key_exists('category_id', $validatedData)) {
-            $product->category_id = $validatedData['category_id'];
+        $product = Product::findOrFail($id);
+        $product->update($validated);
+
+        // Si llegan imágenes nuevas, se reemplazan
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $index => $image) {
+                if ($index < 3) {
+                    $this->saveImage($image, $id, $index + 1);
+                }
+            }
         }
 
-        // Si se recibe nuevas imágenes (imgs), las agregamos
-        if (isset($validatedData['imgs'])) {
-            $existingImgs = json_decode($product->imgs ?? '[]', true);
-    
-            // Combinar las imágenes existentes con las nuevas imágenes
-            $product->imgs = json_encode(array_merge($existingImgs, $validatedData['imgs']));
-        }
-    
-        // Si se reciben imágenes a eliminar (remove_imgs), las eliminamos
-        if (isset($validatedData['remove_imgs'])) {
-            $existingImgs = json_decode($product->imgs ?? '[]', true);
-            
-            // Filtrar las imágenes que no están en el array de eliminación
-            $product->imgs = json_encode(array_diff($existingImgs, $validatedData['remove_imgs']));
-        }
-    
-        $product->save();
-    
-        return response()->json($product);
+        return response()->json([
+            'message' => 'Producto actualizado correctamente',
+            'product' => $product
+        ]);
     }
-    
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+    // DELETE /api/products/{id}
+    public function destroy($id)
     {
         $product = Product::findOrFail($id);
+
+        // Eliminar imágenes
+        for ($i = 1; $i <= 3; $i++) {
+            $this->deleteImage($id, $i);
+        }
+
         $product->delete();
-    
-        return response()->json(null, 204);
+
+        return response()->json(['message' => 'Producto e imágenes eliminadas correctamente']);
+    }
+
+    // GET /api/image/product/{id}/{num}
+    public function getImage($id, $num)
+    {
+        $filename = "product_{$id}_{$num}.webp";
+        $path = storage_path("app/images/{$filename}");
+
+        if (!file_exists($path)) {
+            abort(404);
+        }
+
+        return response()->file($path);
+    }
+
+    // Guardar imagen con formato webp
+    protected function saveImage($image, $id, $num)
+    {
+        $img = Image::make($image)->encode('webp', 90);
+        $filename = "product_{$id}_{$num}.webp";
+        $path = storage_path("app/images/{$filename}");
+        $img->save($path);
+    }
+
+    // Eliminar imagen
+    protected function deleteImage($id, $num)
+    {
+        $filename = "product_{$id}_{$num}.webp";
+        $path = storage_path("app/images/{$filename}");
+
+        if (file_exists($path)) {
+            unlink($path);
+        }
     }
 }

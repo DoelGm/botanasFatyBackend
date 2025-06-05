@@ -15,14 +15,5 @@ class Post extends Model
         'created_at',
         'updated_at',
     ];
-    public function imagenes()
-    {
-        return $this->belongsto(Imagenes::class);
-    }
 
-    
-    public function category()
-    {
-        return $this->belongsTo(Category::class);
-    }
 }
