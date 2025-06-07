@@ -13,7 +13,7 @@ use App\Http\Controllers\PostController; //post
 use App\Http\Controllers\UserController;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;  
+use Illuminate\Support\Facades\Route;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
@@ -25,6 +25,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::get('/products', [ProductController::class, 'index'] );
 Route::get('/products/{id}', [ProductController::class, 'show'] );
+Route::get('/products/category/{id}', [ProductController::class, 'showByCategory'] );
 Route::post('/products', [ProductController::class, 'store'] );
 Route::put('/products/{id}', [ProductController::class, 'update'] );
 Route::delete('/products/{id}', [ProductController::class, 'destroy'] );

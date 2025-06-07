@@ -6,6 +6,8 @@ use App\Models\Product;
 use Illuminate\Http\Request;
 use Intervention\Image\Facades\Image;
 
+
+
 class ProductController extends Controller
 {
     // GET /api/products
@@ -56,12 +58,23 @@ class ProductController extends Controller
         $products = Product::all();
         return response()->json($products);
     }
+    public function showByCategory($id)
+    {
+        $products = Product::where('category_id', $id)->get();
+
+        foreach ($products as $product) {
+            $product->image_urls = $product->image_urls; // usa el accessor del modelo
+        }
+
+        return response()->json($products);
+    }
+
 
     // GET /api/products/{id}
     public function show($id)
     {
         $product = Product::findOrFail($id);
-        
+
         $product->image_urls = $product->image_urls; // usa el accessor del modelo
 
         return response()->json($product);
