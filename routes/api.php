@@ -24,7 +24,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::get('/products', [ProductController::class, 'index'] );
-Route::get('/products/{id}', [ProductController::class, 'show'] );
+// Route::get('/products/{id}', [ProductController::class, 'show'] );
 Route::get('/products/category/{id}', [ProductController::class, 'showByCategory'] );
 Route::post('/products', [ProductController::class, 'store'] );
 Route::put('/products/{id}', [ProductController::class, 'update'] );
@@ -35,15 +35,26 @@ Route::delete('/categories/{id}', [CategoryController::class, 'destroy']);
 Route::post('/categories', [CategoryController::class, 'store']);
 Route::get('/categories', [CategoryController::class, 'index']);
 
+// Subir imágenes a un producto
+Route::post('/products/{id}/images', [ImageController::class, 'uploadImages']);
+
+// Mostrar producto con sus imágenes
+Route::get('/products/images', [ImageController::class, 'showAll']);
+
+Route::get('/products/{id}/images', [ImageController::class, 'show']);
+
+
+// Actualizar (reemplazar) todas las imágenes de un producto
+Route::put('/products/{productId}/images', [ImageController::class, 'updateImages']);
+
+// Eliminar una sola imagen por su ID
+Route::delete('/images/{imageId}', [ImageController::class, 'deleteImage']);
 
 Route::get('/posts', [PostController::class, 'index']);
 Route::get('/posts/{id}', [PostController::class, 'show']);
 Route::post('/posts', [PostController::class, 'store']);
 Route::put('/posts/{id}', [PostController::class, 'update']);
 Route::delete('/posts/{id}', [PostController::class, 'destroy']);
-
-Route::get('/image/{type}/{id}', [ImageController::class, 'getImage']);
-
 
 
 Route::middleware('auth:sanctum')->group(function () {
