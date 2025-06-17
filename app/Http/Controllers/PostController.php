@@ -40,40 +40,52 @@ class PostController extends Controller
         ], 201);
     }
 
-    // Subir imágenes a Cloudinary y asociarlas al post
-    public function uploadImages(Request $request, $postId)
-    {
-        $request->validate([
-            'image.*' => 'required|image|mimes:jpeg,png,jpg,webp|max:2048',
-        ]);
+        public function uploadImages(Request $request, $postId)
+{
+    Log::info('Campos recibidos:', ['data' => $request->all()]);
+    Log::info('Archivos recibidos:', ['files' => $request->allFiles()]);
+    Log::info('Tiene archivo:', ['hasFile' => $request->hasFile('image') ? 'Sí' : 'No']);
 
-        $post = Post::findOrFail($postId);
-        if ($request->hasFile('image')) {
-           
-                try {
-                    // Subir imagen a Cloudinary
-                    $path = Storage::disk('cloudinary')->putFile("posts/$postId", $request->file('image'));
-                    $url = Storage::disk('cloudinary')->url($path);
+    $request->validate([
+        'image' => 'required|image|mimes:jpeg,png,jpg,webp|max:2048',
+    ]);
 
-                    // Guardar en la base de datos
-                  $urlImage =  $post->image()->create([
-                        'cloudinary_url' => $url,
-                        'cloudinary_public_id' => $path,
-                    ]);
-                    Log::info("Imagen guardada en BD para post $postId: $url");
-                } catch (\Exception $e) {
-                    Log::error("Error subiendo imagen: " . $e->getMessage());
-                    return response()->json([
-                        'error' => 'Error al subir la imagen'
-                    ], 500);
-                }
+    Log::info('Campos recibidos:', ['data' => $request->all()]);
+    Log::info('Tiene archivo:', ['hasFile' => $request->hasFile('image') ? 'Sí' : 'No']);
+
+    $post = Post::findOrFail($postId);
+    $urlImage = null;
+
+    Log::info('Inicio de uploadImages');
+    Log::info('Headers:', ['headers' => $request->headers->all()]);
+
+    // Verifica si hay algún archivo en la petición
+    Log::info('Archivos recibidos:', ['files' => $request->allFiles()]);
+
+    if ($request->hasFile('image')) {
+        try {
+            $path = Storage::disk('cloudinary')->putFile("posts/$postId", $request->file('image'));
+            $url = Storage::disk('cloudinary')->url($path);
+
+            $urlImage = $post->image()->create([
+                'cloudinary_url' => $url,
+                'cloudinary_public_id' => $path,
+            ]);
+
+            Log::info("Imagen guardada en BD para post $postId: " . $url);
+        } catch (\Exception $e) {
+            Log::error("Error subiendo imagen: " . $e->getMessage());
+            return response()->json([
+                'error' => 'Error al subir la imagen'
+            ], 500);
         }
-
-        return response()->json([
-            'message' => 'Imágenes subidas correctamente',
-            'image' => $urlImage 
-        ], 201);
     }
+
+    return response()->json([
+        'message' => 'Imagen subida correctamente',
+        'image' => $urlImage,
+    ], 201);
+}
 
     // Actualizar post
     public function update(Request $request, $id)
@@ -93,40 +105,28 @@ class PostController extends Controller
     }
 
     // Eliminar post y sus imágenes
-    public function destroy($id)
-    {
-        $post = Post::with('images')->findOrFail($id);
+public function destroy($id)
+{
+    $post = Post::with('image')->findOrFail($id);
 
-        // Eliminar imágenes de Cloudinary y base de datos
-        foreach ($post->images as $img) {
-            try {
-                Storage::disk('cloudinary')->delete($img->cloudinary_public_id);
-            } catch (\Exception $e) {
-                Log::warning("No se pudo borrar la imagen de Cloudinary: " . $e->getMessage());
-            }
-            $img->delete();
-        }
-
-        $post->delete();
-
-        return response()->json(['message' => 'Post e imágenes eliminados correctamente']);
-    }
-
-    // Eliminar solo una imagen
-    public function deleteImage($imageId)
-    {
-        $image = PostImage::findOrFail($imageId);
-
+    // Verificar si el post tiene una imagen asociada
+    if ($post->image) {
         try {
-            Storage::disk('cloudinary')->delete($image->cloudinary_public_id);
+            // Eliminar la imagen de Cloudinary
+            Storage::disk('cloudinary')->delete($post->image->cloudinary_public_id);
+
+            // Eliminar la imagen de la base de datos
+            $post->image->delete();
         } catch (\Exception $e) {
             Log::warning("No se pudo borrar la imagen de Cloudinary: " . $e->getMessage());
         }
-
-        $image->delete();
-
-        return response()->json(['message' => 'Imagen eliminada correctamente']);
     }
+
+    // Eliminar el post
+    $post->delete();
+
+    return response()->json(['message' => 'Post e imágenes eliminados correctamente']);
+}
 
 
 public function updateImages(Request $request, $postId)
