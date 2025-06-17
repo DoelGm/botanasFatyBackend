@@ -2,7 +2,6 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CustomerController;
-use App\Http\Controllers\CustumerController;
 use App\Http\Controllers\packagesController;
 use App\Http\Controllers\ProductController;
 
@@ -45,10 +44,10 @@ Route::get('/products/{id}/images', [ImageController::class, 'show']);
 
 
 // Actualizar (reemplazar) todas las imágenes de un producto
-Route::put('/products/{productId}/images', [ImageController::class, 'updateImages']);
+Route::post('/products/{product}/updateImages', [ImageController::class, 'updateImages']);
 
 // Eliminar una sola imagen por su ID
-Route::delete('/images/{imageId}', [ImageController::class, 'deleteImage']);
+Route::delete('/products/images/{id}', [ImageController::class, 'deleteImage']);
 
 Route::get('/posts', [PostController::class, 'index']);
 Route::get('/posts/{id}', [PostController::class, 'show']);

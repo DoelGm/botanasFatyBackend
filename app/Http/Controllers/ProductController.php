@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use Illuminate\Http\Request;
-use Intervention\Image\Facades\Image;
 
 
 
@@ -13,7 +12,7 @@ class ProductController extends Controller
     // GET /api/products
     public function index()
     {
-        $products = Product::all();
+        $products = Product::with('images')->get()->all();
         return response()->json($products);
     }
 
