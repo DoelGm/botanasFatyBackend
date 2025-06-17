@@ -4,6 +4,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\packagesController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\TicketController;
 
 use App\Http\Controllers\ImageController; //image
 
@@ -33,6 +34,7 @@ Route::put('/categories/{id}', [CategoryController::class, 'update']);
 Route::delete('/categories/{id}', [CategoryController::class, 'destroy']);
 Route::post('/categories', [CategoryController::class, 'store']);
 Route::get('/categories', [CategoryController::class, 'index']);
+Route::post('/tickets', [TicketController::class, 'store']);
 
 // Subir imágenes a un producto
 Route::post('/products/{id}/images', [ImageController::class, 'uploadImages']);
@@ -54,6 +56,13 @@ Route::get('/posts/{id}', [PostController::class, 'show']);
 Route::post('/posts', [PostController::class, 'store']);
 Route::put('/posts/{id}', [PostController::class, 'update']);
 Route::delete('/posts/{id}', [PostController::class, 'destroy']);
+
+Route::get('/posts-with-images', [PostController::class, 'showAll']);
+Route::get('/posts/{postId}/with-images', [PostController::class, 'show']);
+Route::post('/posts/{postId}/images', [PostController::class, 'uploadImages']);
+Route::post('/posts/{postId}/updateImages', [PostController::class, 'updateImages']);
+Route::delete('/images/{imageId}', [PostController::class, 'deleteImage']);
+
 
 
 Route::middleware('auth:sanctum')->group(function () {

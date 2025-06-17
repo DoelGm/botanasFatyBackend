@@ -12,7 +12,9 @@ class ProductController extends Controller
     // GET /api/products
     public function index()
     {
+
         $products = Product::with('images')->get()->all();
+
         return response()->json($products);
     }
 
@@ -26,9 +28,9 @@ class ProductController extends Controller
             'discount' => 'nullable|numeric',
             'category_id' => 'nullable|exists:categories,id',
             'stock' => 'required|integer|min:0',
+            'images.*' => 'nullable|image|mimes:jpeg,png,jpg,webp',
         ]);
 
-        // Crear el producto
         $product = Product::create($validated);
 
         return response()->json([
@@ -37,13 +39,26 @@ class ProductController extends Controller
         ], 201);
     }
 
+    public function showAll()
+    {
+        $products = Product::all();
+        return response()->json($products);
+    }
     public function showByCategory($id)
     {
-        $products = Product::with('images')->where('category_id', $id)->get();
+        $products = Product::where('category_id', $id)->get();
 
         return response()->json($products);
     }
 
+
+    // GET /api/products/{id}
+    public function show($id)
+    {
+        $product = Product::findOrFail($id);
+
+        return response()->json($product);
+    }
 
     // PUT /api/products/{id}
     public function update(Request $request, $id)
@@ -55,11 +70,11 @@ class ProductController extends Controller
             'discount' => 'nullable|numeric',
             'category_id' => 'nullable|exists:categories,id',
             'stock' => 'sometimes|integer|min:0',
+            'images.*' => 'nullable|image|mimes:jpeg,png,jpg,webp',
         ]);
 
         $product = Product::findOrFail($id);
         $product->update($validated);
-
 
         return response()->json([
             'message' => 'Producto actualizado correctamente',
