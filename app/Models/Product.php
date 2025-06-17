@@ -33,4 +33,11 @@ class Product extends Model
     return $this->hasMany(ProductImage::class);
 }
 
+    public function ticket()
+    {
+        return $this->belongsToMany(Ticket::class, 'ticket_product')
+                    ->withPivot('quantity')
+                    ->withTimestamps();
+    }
+
 }
