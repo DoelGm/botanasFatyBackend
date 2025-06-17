@@ -16,4 +16,16 @@ class Post extends Model
         'updated_at',
     ];
 
+    // Relación: un post tiene muchas imágenes
+    public function image()
+    {
+        return $this->hasOne(PostImage::class);
+    }
+    
+    public function productos()
+    {
+    return $this->belongsToMany(Producto::class, 'ticket_productos')
+                ->withPivot('quantity')
+                ->withTimestamps();
+}
 }
