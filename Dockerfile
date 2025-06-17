@@ -1,6 +1,5 @@
 FROM php:8.2-fpm
 
-# Instalación de extensiones necesarias
 RUN apt-get update && apt-get install -y \
     build-essential \
     libpng-dev \
@@ -8,6 +7,7 @@ RUN apt-get update && apt-get install -y \
     libfreetype6-dev \
     libonig-dev \
     libxml2-dev \
+    libpq-dev \
     zip \
     unzip \
     curl \
