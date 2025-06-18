@@ -73,6 +73,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/customers/{id}', [CustomerController::class, 'destroy']);
 });
 
+Route::middleware('auth:sanctum')->post('/logout', function (Request $request) {
+    $request->user()->tokens->each(function ($token) {
+        $token->delete();  // Eliminar todos los tokens asociados al usuario
+    });
+    return response()->json(['message' => 'Sesión cerrada correctamente.']);
+});
+
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/users', [UserController::class, 'index']);
     Route::get('/users/{id}', [UserController::class, 'show']);
