@@ -16,7 +16,7 @@ public function uploadImages(Request $request, $productId)
     }
 
     $request->validate([
-        'images.*' => 'required|image|mimes:jpeg,png,jpg,webp|max:2048',
+        'images.*' => 'required|image|mimes:jpeg,png,jpg,webp|max:5048',
     ]);
 
     $product = Product::findOrFail($productId);
