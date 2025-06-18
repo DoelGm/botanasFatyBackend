@@ -46,7 +46,7 @@ class ProductController extends Controller
     }
     public function showByCategory($id)
     {
-        $products = Product::where('category_id', $id)->get();
+        $products = Product::with('images')->where('category_id', $id)->get();
 
         return response()->json($products);
     }
