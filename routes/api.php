@@ -15,6 +15,8 @@ use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
+use App\Http\Controllers\RegisterController;
+
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
@@ -62,6 +64,9 @@ Route::get('/posts/{postId}/with-images', [PostController::class, 'show']);
 Route::post('/posts/{postId}/images', [PostController::class, 'uploadImages']);
 Route::post('/posts/{postId}/updateImages', [PostController::class, 'updateImages']);
 Route::delete('/images/{imageId}', [PostController::class, 'deleteImage']);
+
+
+Route::post('/registerUser', [RegisterController::class, 'store']);
 
 
 
